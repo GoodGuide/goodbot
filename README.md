@@ -1,35 +1,21 @@
 # goodbot
 
-FIXME: description
-
-## Installation
-
-Download from http://example.com/FIXME.
+GoodGuide's IRC bot
 
 ## Usage
 
-FIXME: explanation
+Type `.help` in IRC.
 
-    $ java -jar goodbot-0.1.0-standalone.jar [args]
+## Development
 
-## Options
+This project is set up with leiningen.
 
-FIXME: listing of options this app accepts.
+A goodbot plugin is a map with the following keys
 
-## Examples
+``` clojure
+{:command "foo" ; the command used to call this plugin, in this case .foo
+ :doc ".foo <arg> <arg> : a docstring that will be printed on `.help foo`"
+ :handler (fn [irc message] ...)} ; a callback for when this plugin is called
+```
 
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2014 FIXME
-
-Distributed under the Eclipse Public License, the same as Clojure.
+See `goodbot.plugins.ping` for a simple example.
