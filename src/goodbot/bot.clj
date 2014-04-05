@@ -27,8 +27,9 @@
   help-plugin)
 
 (defn respond-with [irc message responses]
-  (def vec-responses (if (coll? responses) responses [responses]))
-  (doseq [r vec-responses] (irclj/reply irc message r)))
+  (when-not (nil? responses)
+    (def vec-responses (if (coll? responses) responses [responses]))
+    (doseq [r vec-responses] (irclj/reply irc message r))))
 
 (defn make-callback [plugins]
   (def plugins-with-help (conj plugins (make-help plugins)))
