@@ -13,11 +13,9 @@
     (defn handle [command]
       (println "plugins" plugins-with-help)
       (if-let [plugin (select-plugin plugins-with-help command)]
-        (irclj/reply irc message
-                     (or (:doc plugin)
-                         (str "." command " doesn't have documentation!")))
-        (irclj/reply irc message
-                     (str "unknown command ." command))))
+        (or (:doc plugin)
+            (str "." command " doesn't have documentation!"))
+        (str "unknown command ." command)))
     (if-let [[command _] (extract-word message)]
       (handle command)
       (handle "help")))
@@ -28,12 +26,18 @@
   (def plugins-with-help (conj plugins help-plugin))
   help-plugin)
 
+(defn respond-with [irc message responses]
+  (def vec-responses (if (coll? responses) responses [responses]))
+  (doseq [r vec-responses] (irclj/reply irc message r)))
+
 (defn make-callback [plugins]
   (def plugins-with-help (conj plugins (make-help plugins)))
   (fn [irc message]
     (when-let [[command rest-of-text] (extract-command message)]
       (println "COMMAND: " command)
       (when-let [plugin (select-plugin plugins-with-help command)]
-        (let [updated-message (assoc message :text rest-of-text)
-              handler (:handler plugin)]
-          (handler irc updated-message))))))
+        (def updated-message (assoc message :text rest-of-text) )
+        (def handler (:handler plugin))
+        (when-let [responses (handler irc updated-message)]
+          (println "RESPONSES: " responses)
+          (respond-with irc message responses))))))
