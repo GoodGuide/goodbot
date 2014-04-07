@@ -8,7 +8,8 @@
 
 (defn safe-eval-string [code]
   (println "code: " code)
-  (-> code clojail/safe-read sandbox))
+  (try (-> code clojail/safe-read sandbox str)
+    (catch Throwable e (str "error: " e))))
 
 (def plugin {:command "clj"
              :doc ".clj <code> : evals the given clojure code"
