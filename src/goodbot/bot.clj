@@ -4,11 +4,13 @@
    [irclj.core :as irclj]
    [goodbot.parse :refer [extract-command extract-word]]])
 
+(defn select-plugin [plugins name]
+  (->> plugins (filter #(= name (:command %)) first)))
+
 (defn add-help [plugins]
   (declare plugins-with-help)
   (defn help-handler [irc message]
     (defn handle [command]
-      (println "plugins" plugins-with-help)
       (if-let [plugin (select-plugin plugins-with-help command)]
         (or (:doc plugin)
             (str "." command " doesn't have documentation!"))
