@@ -5,7 +5,7 @@
    [goodbot.parse :refer [extract-command extract-word]]])
 
 (defn select-plugin [plugins name]
-  (->> plugins (filter #(= name (:command %)) first)))
+  (->> plugins (filter #(= name (:command %))) first))
 
 (defn add-help [plugins]
   (declare plugins-with-help)
