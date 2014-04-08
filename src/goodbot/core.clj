@@ -1,6 +1,7 @@
 (ns goodbot.core
   "Chatbot for GoodGuide"
   (:require [irclj.core :as irclj]
+            [irclj.events]
             [goodbot.bot :as bot]
             [goodbot.plugins.ping :as ping]
             [goodbot.plugins.clojure :as clj]))
@@ -21,7 +22,7 @@
                            :callbacks {:privmsg (bot/make-callback
                                                   [ping/plugin
                                                    clj/plugin])
-                                       :raw-log println})]
+                                       :raw-log irclj.events/stdout-callback})]
     ; XXX HACK remove me once prefixes gets defaulted in irclj (and released) ! XXX
     (dosync (alter bot assoc :prefixes {}))
 

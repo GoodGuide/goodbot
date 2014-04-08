@@ -29,7 +29,6 @@
   (when-not (nil? responses)
     (def vec-responses (if (coll? responses) responses [responses]))
     (doseq [r vec-responses]
-      (println "RESPONDING:" r)
       (irclj/reply irc message r))))
 
 (defn make-callback [plugins]
