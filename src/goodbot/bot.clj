@@ -35,10 +35,13 @@
 (defn make-callback [plugins]
   (def plugins-with-help (add-help plugins))
   (fn [irc message]
-    (when-let [[command rest-of-text] (extract-command message)]
-      (println "COMMAND: " command rest-of-text)
-      (when-let [plugin (select-plugin plugins-with-help command)]
-        (def updated-message (assoc message :text rest-of-text) )
-        (def handler (:handler plugin))
-        (when-let [responses (handler irc updated-message)]
-          (respond-with irc message responses))))))
+    (try
+      (when-let [[command rest-of-text] (extract-command message)]
+        (println "COMMAND: " command rest-of-text)
+        (when-let [plugin (select-plugin plugins-with-help command)]
+          (def updated-message (assoc message :text rest-of-text) )
+          (def handler (:handler plugin))
+          (when-let [responses (handler irc updated-message)]
+            (respond-with irc message responses))))
+      (catch Throwable e
+        (irclj/reply irc message (str "error: " e))))))
