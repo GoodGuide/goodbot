@@ -9,4 +9,5 @@ RUN wget https://raw.github.com/technomancy/leiningen/stable/bin/lein -O /usr/lo
 
 ADD . /app
 RUN cd /app && lein deps
+RUN cp /app/sandbox.policy /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/security/java.policy
 CMD cd /app && lein run
