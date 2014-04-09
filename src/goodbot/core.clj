@@ -4,6 +4,7 @@
             [goodbot.plugins.ping]
             [goodbot.plugins.clojure]
             [goodbot.plugins.karma]
+            [goodbot.plugins.data]
             [goodbot.plugins.help]))
 
 (def host     (or (System/getenv "GOODBOT_HOST")    "irc.freenode.net"))
@@ -20,6 +21,7 @@
   (goodbot.bot/start [goodbot.plugins.ping/plugin
                       goodbot.plugins.clojure/plugin
                       goodbot.plugins.karma/plugin
+                      goodbot.plugins.data/plugin
                       goodbot.plugins.help/plugin]
                        :host host
                        :port port
