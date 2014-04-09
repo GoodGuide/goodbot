@@ -40,6 +40,7 @@
                  :prefixes {}
                  :datomic-uri datomic-uri
                  :plugins plugins))
+  (println "connecting to datomic at" datomic-uri)
   (db/start bot)
   (when password (irclj/identify bot password))
   (doseq [c channels] (println "joining" c) (irclj/join bot c)))

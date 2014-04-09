@@ -22,12 +22,7 @@
 (defn start [irc]
   (d/create-database (:datomic-uri @irc))
   (def conn (get-conn irc))
-  (println "*********")
-  (println "plugins: " (:plugins @irc))
   (doseq [plugin (:plugins @irc)]
     (def resource-name (str "schemas/" (:command plugin) ".edn"))
-    (println "resource-name: " resource-name)
-    (println "resource: " (clojure.java.io/resource resource-name))
     (when-let [resource (clojure.java.io/resource resource-name)]
-      (println "loading schema " resource-name)
       (load-datoms-from-resource conn resource))))
