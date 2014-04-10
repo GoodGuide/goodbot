@@ -5,6 +5,7 @@
             [goodbot.plugins.clojure]
             [goodbot.plugins.karma]
             [goodbot.plugins.data]
+            [goodbot.plugins.who]
             [goodbot.plugins.help]))
 
 (defn -main
@@ -32,6 +33,7 @@
                         goodbot.plugins.clojure/plugin
                         goodbot.plugins.karma/plugin
                         goodbot.plugins.data/plugin
+                        goodbot.plugins.who/plugin
                         goodbot.plugins.help/plugin]
                        :host host
                        :port (Integer/parseInt port)
