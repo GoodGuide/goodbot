@@ -25,4 +25,5 @@
   (doseq [plugin (:plugins @irc)]
     (def resource-name (str "schemas/" (:command plugin) ".edn"))
     (when-let [resource (clojure.java.io/resource resource-name)]
+      (println "loading schema" resource-name)
       (load-datoms-from-resource conn resource))))
