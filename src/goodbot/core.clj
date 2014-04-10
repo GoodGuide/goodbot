@@ -7,26 +7,36 @@
             [goodbot.plugins.data]
             [goodbot.plugins.help]))
 
-(def host     (or (System/getenv "GOODBOT_HOST")    "irc.freenode.net"))
-(def port     (or (System/getenv "GOODBOT_PORT")    6667))
-(def nick     (or (System/getenv "GOODBOT_NICK")    "goodbot-test"))
-(def channel  (or (System/getenv "GOODBOT_CHANNEL") "#goodbot-test"))
-(def server-password (or (System/getenv "GOODBOT_SERVER_PASSWORD") nil))
-(def password (or (System/getenv "GOODBOT_PASSWORD") nil))
-(def datomic-uri (or (System/getenv "GOODBOT_DATOMIC") "datomic:mem://goodbot"))
-
 (defn -main
   "Starts the bot"
   [& args]
-  (goodbot.bot/start [goodbot.plugins.ping/plugin
-                      goodbot.plugins.clojure/plugin
-                      goodbot.plugins.karma/plugin
-                      goodbot.plugins.data/plugin
-                      goodbot.plugins.help/plugin]
+  (let [[host port] (-> (System/getenv "GOODBOT_HOST")
+                        (or "irc.freenode.net:6667")
+                        (.split ":" 2))
+        channels (-> (System/getenv "GOODBOT_CHANNELS")
+                     (or "#goodbot-test")
+                     (.split ",")
+                     vec)
+        nick (-> (System/getenv "GOODBOT_NICK") (or "goodbot-test"))
+        server-password (System/getenv "GOODBOT_SERVER_PASSWORD")
+        password (System/getenv "GOODBOT_PASSWORD")
+        datomic-uri (-> (System/getenv "GOODBOT_DATOMIC")
+                        ; detect docker link
+                        (or (when-let [link-uri (System/getenv "TRANSACTOR_PORT")]
+                              (-> link-uri
+                                  (.replace "tcp" "datomic:free")
+                                  (str "/goodbot"))))
+                        ; default to in-memory
+                        (or "datomic:mem://goodbot"))]
+    (goodbot.bot/start [goodbot.plugins.ping/plugin
+                        goodbot.plugins.clojure/plugin
+                        goodbot.plugins.karma/plugin
+                        goodbot.plugins.data/plugin
+                        goodbot.plugins.help/plugin]
                        :host host
-                       :port port
+                       :port (Integer/parseInt port)
                        :nick nick
                        :password password
-                       :channels [channel]
+                       :channels channels
                        :server-password server-password
-                       :datomic-uri datomic-uri))
+                       :datomic-uri datomic-uri)))
