@@ -15,9 +15,9 @@
                     clojure.java.io/reader
                     java.io.PushbackReader.)]
     (doseq [datoms (clojure.edn/read
-                             {:readers *data-readers*}
-                             r)]
-      (d/transact conn [datoms]))))
+                     {:readers *data-readers*}
+                     r)]
+      @(d/transact conn [datoms]))))
 
 (defn start [irc]
   (d/create-database (:datomic-uri @irc))
