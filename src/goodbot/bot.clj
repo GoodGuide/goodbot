@@ -4,7 +4,7 @@
    [irclj.core :as irclj]
    [irclj.events]
    [goodbot.db :as db]
-   [goodbot.parse :refer [extract-command extract-word]]])
+   [goodbot.parse :refer [extract-command]]])
 
 (defn select-plugin [plugins name]
   (->> plugins (filter #(= name (:command %))) first))
@@ -18,13 +18,12 @@
 (defn privmsg-callback [plugins]
   (fn [irc message]
     (try
-      (when-let [[command rest-of-text] (extract-command message)]
-        (println "COMMAND: " command rest-of-text)
+      (when-let [[command updated-message] (extract-command message)]
+        (println "COMMAND: " command (str [(:text message)]))
         (when-let [plugin (select-plugin plugins command)]
-          (def updated-message (assoc message :text rest-of-text) )
           (def handler (:handler plugin))
           (when-let [responses (handler irc updated-message)]
-            (respond-with irc message responses))))
+            (respond-with irc updated-message responses))))
       (catch Throwable e
         (irclj/reply irc message (str "error: " e))))))
 

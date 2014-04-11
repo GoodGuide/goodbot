@@ -13,12 +13,13 @@
     (datomic/entity db id)))
 
 (defmulti handle-who
-  (fn [_ _ c _] c))
+  (fn [_ c _] c))
 
-(defmethod handle-who "add" [irc message _ rest]
+(defmethod handle-who "add" [irc _ message]
   (def conn (db/get-conn irc))
   (def db (datomic/db conn))
-  (when-let [[who-nick desc] (extract-word {:text rest})]
+  (when-let [[who-nick message] (extract-word message)]
+    (def desc (:text message))
     (def entry (find-entry db who-nick))
     (if (and entry
              (= (:who.entry/submitter entry) who-nick)
@@ -30,10 +31,10 @@
                                     :who.entry/desc desc}])
           (str "added " who-nick " as " desc " (by " (:nick message) ")")))))
 
-(defmethod handle-who "is" [irc message _ rest]
+(defmethod handle-who "is" [irc _ message]
   (def conn (db/get-conn irc))
   (def db (datomic/db conn))
-  (when-let [[who-nick _] (extract-word {:text rest})]
+  (when-let [[who-nick _] (extract-word message)]
     (if-let [entry (find-entry db who-nick)]
       (str who-nick " is " (:who.entry/desc entry))
       (str "no entry for " who-nick "."))))
@@ -41,7 +42,7 @@
 (defmethod handle-who "added" [irc message _ rest]
   (def conn (db/get-conn irc))
   (def db (datomic/db conn))
-  (when-let [[who-nick _] (extract-word {:text rest})]
+  (when-let [[who-nick _] (extract-word message)]
     (if-let [entry (find-entry db who-nick)]
       (str "entry for " who-nick " was added by " (:who.entry/submitter entry))
       (str "no entry for " who-nick "."))))
@@ -51,5 +52,5 @@
              :doc ".who [is|add|added] : manage user descriptions"
              :handler (fn [irc message]
                         (->> (extract-word message)
-                             (concat [irc message])
+                             (concat [irc])
                              (apply handle-who)))})

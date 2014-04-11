@@ -4,10 +4,11 @@
 (defn extract-command [message]
   (if-let [[_ cmd rest-of-text]
            (re-find #"^[.](\S+)\s*(.*)$" (:text message))]
-    [cmd rest-of-text]))
+    [cmd (assoc message :text rest-of-text
+                        :command cmd)]))
 
 (defn extract-word [message]
   (if-let [[_ word rest-of-text]
            (re-find #"^(\S+)\s*(.*)$" (:text message))]
-    [word rest-of-text]))
+    [word (assoc message :text rest-of-text)]))
 
