@@ -39,6 +39,7 @@
   (dosync (alter bot assoc
                  :prefixes {}
                  :datomic-uri datomic-uri
+                 :ssl? true
                  :plugins plugins)
           (println "connecting to datomic at" datomic-uri))
   (db/start bot)
