@@ -3,9 +3,13 @@ FROM goodguide/base
 RUN aptitude update && aptitude -y install openjdk-7-jre-headless
 
 RUN aptitude -y install unzip
+
 RUN wget -O /tmp/datomic-free.zip https://my.datomic.com/downloads/free/0.9.4707 \
- && unzip -d /opt /tmp/datomic-free.zip
+ && unzip -d /tmp /tmp/datomic-free.zip \
+ && mv /tmp/datomic-free-0.9.4707 /app \
+ && rm /tmp/datomic-free.zip
+
+ADD ./config.properties /app/config/config.properties
 
 EXPOSE 4334
-CMD cd /opt/datomic-free-0.9.4707 \
- && ./bin/transactor ./config/samples/free-transactor-template.properties
+CMD cd /app && ./bin/transactor ./config/config.properties
