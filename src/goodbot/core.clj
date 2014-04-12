@@ -3,7 +3,7 @@
   (:require [goodbot.bot :as bot]
             [goodbot.plugins.ping]
             [goodbot.plugins.clojure]
-            [goodbot.plugins.karma]
+            [goodbot.plugins.vote]
             [goodbot.plugins.data]
             [goodbot.plugins.who]
             [goodbot.plugins.help]))
@@ -31,7 +31,7 @@
                         (or "datomic:mem://goodbot"))]
     (goodbot.bot/start [goodbot.plugins.ping/plugin
                         goodbot.plugins.clojure/plugin
-                        goodbot.plugins.karma/plugin
+                        goodbot.plugins.vote/plugin
                         goodbot.plugins.data/plugin
                         goodbot.plugins.who/plugin
                         goodbot.plugins.help/plugin]
