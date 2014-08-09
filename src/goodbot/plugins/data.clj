@@ -14,7 +14,6 @@
                  clojail/safe-read))
   (str (datomic/q query db-value)))
 
-(def plugin {:command "data"
-             :author "jayferd"
-             :doc "runs datalog queries against the datomic db"
-             :handler handle-data})
+(def plugin {:author "jneen"
+             :doc {"data" "runs datalog queries against the datomic db"}
+             :commands {"data" handle-data}})

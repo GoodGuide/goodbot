@@ -47,10 +47,13 @@
       (str "entry for " who-nick " was added by " (:who.entry/submitter entry))
       (str "no entry for " who-nick "."))))
 
-(def plugin {:command "who"
-             :author "jayferd"
-             :doc ".who [is|add|added] : manage user descriptions"
-             :handler (fn [irc message]
-                        (->> (extract-word message)
-                             (concat [irc])
-                             (apply handle-who)))})
+(def plugin {:author "jneen"
+             :doc {"who" "manage user descriptions"
+                   "who-is" ".who is <person> : print <person>'s description"
+                   "who-add" ".who add <person> <desc> : record who <person> is"
+                   "who-added" ".who added <person> : print the user who set <person>'s description"}
+             :schema "who.edn"
+             :commands {"who" (fn [irc message]
+                                (->> (extract-word message)
+                                  (concat [irc])
+                                  (apply handle-who)))}})

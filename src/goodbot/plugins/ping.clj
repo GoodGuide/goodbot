@@ -3,5 +3,5 @@
 
 (def plugin {:command "ping"
              :author "jayferd"
-             :doc ".ping : responds with \"pong\""
-             :handler (fn [irc message] "pong")})
+             :doc {"ping" ".ping : responds with \"pong\""}
+             :commands {"ping" (fn [irc message] "pong")}})

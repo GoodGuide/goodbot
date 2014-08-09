@@ -11,6 +11,6 @@
   (try (-> code clojail/safe-read sandbox str)
     (catch Throwable e (str "error: " e))))
 
-(def plugin {:command "clj"
-             :doc ".clj <code> : evals the given clojure code"
-             :handler (fn [irc message] (-> message :text safe-eval-string))})
+(def plugin {:author "jneen"
+             :doc {"clj" ".clj <code> : evals the given clojure code"}
+             :commands {"clj" (fn [irc message] (-> message :text safe-eval-string))}})

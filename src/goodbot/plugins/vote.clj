@@ -33,13 +33,13 @@
   (def magnitude-string (apply str (rest vote)))
   (def magnitude (if (empty? magnitude-string) 1 (parse-int magnitude-string)))
   (when magnitude
-    (def count (if (= \+ (first vote)) magnitude (- 0 magnitude)))
+    (def total (if (= \+ (first vote)) magnitude (- 0 magnitude)))
     (def conn (db/get-conn irc))
     @(datomic/transact conn [{:db/id (datomic/tempid :db.part/vote)
                               :vote.entry/name (:text message)
-                              :vote.entry/count count
+                              :vote.entry/count total
                               :vote.entry/voter (:nick message)}])
-    (str "voted " count " for " (:text message))))
+    (str "voted " total " for " (:text message))))
 
 (defmulti handle-vote
   (fn [_ c _] c))
@@ -73,12 +73,15 @@
                     (fmap sum-votes)))
   (str "votes by " (:text message) ": " (str summary)))
 
-(def plugin {:command "vote"
-             :author "jayferd"
-             :doc ".vote [+n|-n|score|show|votes]: upvote or downvote things"
-             :handler (fn [irc message]
-                        (def first-char (-> message :text first))
-                        (let [handler (if ((set "+-") first-char)
-                                        handle-plus-minus
-                                        handle-vote)]
-                          (apply handler (concat [irc] (extract-word message)))))})
+(def plugin {:author "jneen"
+             :doc {"vote" ".vote [+n|-n] : vote on things"
+                   "vote-score" ".vote score <thing> : show the score for <thing>"
+                   "vote-show" ".vote show <thing> : show votes about <thing>"
+                   "vote-by" ".vote by <person> : show <person>'s votes"}
+             :schema "vote.edn"
+             :commands {"vote" (fn [irc message]
+                                 (def first-char (-> message :text first))
+                                 (let [handler (if ((set "+-") first-char)
+                                                 handle-plus-minus
+                                                 handle-vote)]
+                                   (apply handler (concat [irc] (extract-word message)))))}})
