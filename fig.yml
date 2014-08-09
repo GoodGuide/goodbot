@@ -1,0 +1,12 @@
+transactor:
+  build: ./transactor
+  volumes:
+    - ./data:/app/data
+
+bot:
+  build: .
+  links:
+    - transactor
+  environment:
+    - GOODBOT_CHANNELS=#goodbot-test
+    - GOODBOT_NICK=goodbot-test

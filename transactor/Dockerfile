@@ -1,15 +1,18 @@
-FROM goodguide/base
+FROM base/devel
 
-RUN aptitude update && aptitude -y install openjdk-7-jre-headless
+RUN pacman --noconfirm -Sy jdk7-openjdk
 
-RUN aptitude -y install unzip
+RUN pacman --noconfirm -Sy unzip
 
-RUN wget -O /tmp/datomic-free.zip https://my.datomic.com/downloads/free/0.9.4707 \
+RUN curl -L https://my.datomic.com/downloads/free/0.9.4815.12 > /tmp/datomic-free.zip \
  && unzip -d /tmp /tmp/datomic-free.zip \
- && mv /tmp/datomic-free-0.9.4707 /app \
+ && mv /tmp/datomic-free-0.9.4815.12 /app \
  && rm /tmp/datomic-free.zip
 
-ADD ./config.properties /app/config/config.properties
+WORKDIR /app
 
 EXPOSE 4334
-CMD cd /app && ./bin/transactor ./config/config.properties
+
+ADD ./config.properties /app/config/
+
+CMD ./bin/transactor ./config/config.properties
