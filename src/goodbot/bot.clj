@@ -19,7 +19,7 @@
   (fn [irc message]
     (try
       (when-let [[command updated-message] (extract-command message)]
-
+        (println "COMMAND: " command (str [(:text message)]))
         (if-let [handler (select-handler plugins command)]
           (when-let [responses (handler irc updated-message)]
             (respond-with irc updated-message responses))
