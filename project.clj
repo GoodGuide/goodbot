@@ -7,5 +7,6 @@
                  [irclj "0.5.0-alpha4"]
                  [com.datomic/datomic-free "0.9.4707"]
                  [org.clojure/algo.generic "0.1.0"]
-                 [clojail "1.0.6"]]
+                 [clojail "1.0.6"],
+                 [org.clojure/tools.namespace "0.2.7"]]
   :main goodbot.core)

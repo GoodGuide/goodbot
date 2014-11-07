@@ -20,9 +20,12 @@
     (try
       (when-let [[command updated-message] (extract-command message)]
         (println "COMMAND: " command (str [(:text message)]))
-        (when-let [handler (select-handler plugins command)]
+        (if-let [handler (select-handler plugins command)]
           (when-let [responses (handler irc updated-message)]
-            (respond-with irc updated-message responses))))
+            (respond-with irc updated-message responses))
+          (respond-with irc updated-message
+            (str "Sorry, I'm not smart enough to "
+              (get updated-message :command) ". Try .help instead."))))
       (catch Throwable e
         (irclj/reply irc message (str "error: " e))
         (println (.getMessage e))
