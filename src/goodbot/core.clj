@@ -40,7 +40,5 @@
   "Starts the bot"
   [& args]
   (let [plugins (get-plugin-symbols)]
-    (println "Loaded plugins: ")
-    (doseq [plugin plugins] (println "  " plugin))
     (doseq [ns plugins] (require ns)) ; require all the plugin namespaces
     (run (map (fn [plugin] (deref (ns-resolve plugin 'plugin))) plugins))))

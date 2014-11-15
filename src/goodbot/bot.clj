@@ -5,7 +5,9 @@
    [irclj.events]
    [goodbot.db :as db]
    [goodbot.parse :refer [extract-command]]
-   [overtone.at-at :as at]])
+   [overtone.at-at :as at]
+   [clojure.string :as str]])
+
 
 (defn select-handler [plugins name]
   (->> plugins (map #(get-in % [:commands name])) (remove nil?) first))
@@ -42,11 +44,19 @@
         (fn [] ((get task :work) bot))
         task-scheduler-pool
         :fixed-delay true
+        ; delay fso that channels can be joined(since its async/no callback)
         :initial-delay 20000))))
+
+(defn get-plugin-commands [plugins]
+  (mapcat #(keys (:commands %)) plugins))
 
 (defn start [plugins & {:keys [host port nick password
                                channels server-password
                                datomic-uri]}]
+
+  (println "Commands : " (str/join ", " (get-plugin-commands plugins)))
+  (println "Tasks    : " (str/join ", " (map :name (mapcat :tasks plugins))))
+
   (println (str "connecting to " host ":" port " as " nick " with password " server-password))
   (def bot (irclj/connect host port nick
                           :pass server-password
