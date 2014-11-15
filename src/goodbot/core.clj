@@ -1,12 +1,8 @@
 (ns goodbot.core
   "Chatbot for GoodGuide"
   (:require [goodbot.bot :as bot]
-            [goodbot.plugins.ping]
-            [goodbot.plugins.clojure]
-            [goodbot.plugins.vote]
-            [goodbot.plugins.data]
-            [goodbot.plugins.who]
-            [goodbot.plugins.help]))
+            [clojure.tools.namespace.find :as namespace-tools]
+            [clojure.java.io :as io]))
 
 (defn run [plugins]
   "runs a bot with the given plugins with configuration based on environment variables"
@@ -37,12 +33,12 @@
                        :server-password server-password
                        :datomic-uri datomic-uri)))
 
+(defn get-plugin-symbols []
+  (namespace-tools/find-namespaces-in-dir (io/file "src/goodbot/plugins")))
+
 (defn -main
   "Starts the bot"
   [& args]
-  (run [goodbot.plugins.ping/plugin
-        goodbot.plugins.clojure/plugin
-        goodbot.plugins.vote/plugin
-        goodbot.plugins.data/plugin
-        goodbot.plugins.who/plugin
-        goodbot.plugins.help/plugin]))
+  (let [plugins (get-plugin-symbols)]
+    (doseq [ns plugins] (require ns)) ; require all the plugin namespaces
+    (run (map (fn [plugin] (deref (ns-resolve plugin 'plugin))) plugins))))

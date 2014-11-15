@@ -4,7 +4,10 @@
    [irclj.core :as irclj]
    [irclj.events]
    [goodbot.db :as db]
-   [goodbot.parse :refer [extract-command]]])
+   [goodbot.parse :refer [extract-command]]
+   [overtone.at-at :as at]
+   [clojure.string :as str]])
+
 
 (defn select-handler [plugins name]
   (->> plugins (map #(get-in % [:commands name])) (remove nil?) first))
@@ -20,17 +23,40 @@
     (try
       (when-let [[command updated-message] (extract-command message)]
         (println "COMMAND: " command (str [(:text message)]))
-        (when-let [handler (select-handler plugins command)]
+        (if-let [handler (select-handler plugins command)]
           (when-let [responses (handler irc updated-message)]
-            (respond-with irc updated-message responses))))
+            (respond-with irc updated-message responses))
+          (respond-with irc updated-message
+            (str "Sorry, I'm not smart enough to "
+              (get updated-message :command) ". Try .help instead."))))
       (catch Throwable e
         (irclj/reply irc message (str "error: " e))
         (println (.getMessage e))
         (.printStackTrace e)))))
 
+(defn schedule-tasks [bot, plugins]
+  "Schedule all plugin tasks"
+  (def task-scheduler-pool (at/mk-pool))
+  (doseq [plugin plugins]
+    (doseq [task (get plugin :tasks)]
+      (at/every
+        (get task :interval)
+        (fn [] ((get task :work) bot))
+        task-scheduler-pool
+        :fixed-delay true
+        ; delay fso that channels can be joined(since its async/no callback)
+        :initial-delay 20000))))
+
+(defn get-plugin-commands [plugins]
+  (mapcat #(keys (:commands %)) plugins))
+
 (defn start [plugins & {:keys [host port nick password
                                channels server-password
                                datomic-uri]}]
+
+  (println "Commands : " (str/join ", " (get-plugin-commands plugins)))
+  (println "Tasks    : " (str/join ", " (map :name (mapcat :tasks plugins))))
+
   (println (str "connecting to " host ":" port " as " nick " with password " server-password))
   (def bot (irclj/connect host port nick
                           :pass server-password
@@ -45,4 +71,5 @@
     (println "connecting to datomic at" datomic-uri)
     (db/start bot))
   (when password (irclj/identify bot password))
-  (doseq [c channels] (println "joining" c) (irclj/join bot c)))
+  (doseq [c channels] (println "joining" c) (irclj/join bot c))
+  (schedule-tasks bot plugins))
