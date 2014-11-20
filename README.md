@@ -10,11 +10,12 @@ Type `.help` in IRC.
 
 This project is set up with leiningen.
 
-A goodbot plugin is a map with the following keys
+To get started on OSX:
+``` shell
+  brew install leiningen
+  git clone https://github.com/GoodGuide/goodbot.git
+  cd goodbot
+  lein run
+ ```
 
-``` clojure
-{:doc {"topic" "text to display on `.help <topic>`"}
- :commands {"foo" (fn [irc message] ...)} ; a callback for when .foo is entered
-```
-
-See `goodbot.plugins.ping` for a simple example.
+Goodbots can be extended via simple [plugins](src/goodbot/plugins/).
