@@ -61,7 +61,8 @@
   (def bot (irclj/connect host port nick
                           :pass server-password
                           :callbacks {:privmsg (privmsg-callback plugins)
-                                      :raw-log irclj.events/stdout-callback}))
+                                      :raw-log irclj.events/stdout-callback}
+                          :ssl? true))
   (dosync
     (alter bot assoc
            :prefixes {}
