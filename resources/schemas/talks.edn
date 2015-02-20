@@ -1,0 +1,24 @@
+[{:db/id #db/id[:db.part/db]
+  :db/ident :db.part/talks
+  :db.install/_partition :db.part/db}
+
+ {:db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db
+  :db/ident :talks.presenter/nick
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity}
+
+ {:db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db
+  :db/ident :talks.presenter/last-presented
+  :db/valueType :db.type/instant
+  :db/cardinality :db.cardinality/one}
+
+{:db/id #db/id[:db.part/talks -1000002] :talks.presenter/nick "joshuabates" :talks.presenter/last-presented #inst "2011-09-11T10:50:29.00Z" }
+{:db/id #db/id[:db.part/talks -1000003] :talks.presenter/nick "marlenac" :talks.presenter/last-presented #inst "2012-09-11T10:50:29.00Z" }
+{:db/id #db/id[:db.part/talks -1000004] :talks.presenter/nick "nathan" :talks.presenter/last-presented #inst "2013-09-11T10:50:29.00Z" }
+{:db/id #db/id[:db.part/talks -1000005] :talks.presenter/nick "davidhampgonsalves" :talks.presenter/last-presented #inst "2014-09-11T10:50:29.00Z" }
+]
+
+
