@@ -11,5 +11,5 @@
 (def plugin {:author "davidhampgonsalves"
              :schema "level-up.edn"
              :tasks [{:name "celebrate learning new tricks"
-                      :interval 0
+                      :run-at-start true
                       :work level-up}]})

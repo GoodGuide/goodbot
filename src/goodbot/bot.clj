@@ -40,15 +40,17 @@
   (def task-scheduler-pool (at/mk-pool))
   (doseq [plugin plugins]
     (doseq [task (get plugin :tasks)]
-      (def interval (:interval task))
-      (println "  scheduling " interval)
-      ; if interval is 0 call the task once after a fixed delay(for channels to be joined)
-      (apply (if (zero? interval) at/after at/every)
-          [(if (zero? interval) warm-up-delay interval)
+      (if (contains? task :interval) 
+        (at/every (:interval task)
             #((:work task) bot)
             task-scheduler-pool
             :fixed-delay true
-            :initial-delay warm-up-delay]))))
+            :initial-delay warm-up-delay]))
+      (if (contains? task :run-at-startup)
+        (at/after 
+          warm-up-delay
+          #((:work task) bot)
+          task-scheduler-pool))))
 
 (defn get-plugin-commands [plugins]
   (mapcat #(keys (:commands %)) plugins))
