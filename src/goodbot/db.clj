@@ -2,11 +2,14 @@
   "data functions"
   (:require [datomic.api :as d :refer [db q]]))
 
-(defn hello [] (println "hello"))
-
 (defn get-conn [irc]
   (def uri (:datomic-uri @irc))
   (d/connect uri))
+
+(defn transact [irc q]
+  (println q)
+  (def conn (get-conn irc))
+  @(d/transact conn q))
 
 (defn resource [name] (clojure.java.io/resource name))
 

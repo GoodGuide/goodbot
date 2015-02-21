@@ -1,12 +1,11 @@
 (ns goodbot.plugins.health
   "Monitors the health of Production."
   (:require [goodbot.parse :refer [extract-word]]
+            [goodbot.bot :as bot]
             [irclj.core :as irclj]
             [clojure.string :refer [join]]
             [clj-http.client :as client]
             [clojure.data :as data]))
-
-(def channel "#goodbot-test")
 
 (def site-health (atom {:up true :maintenance false}))
 
@@ -22,8 +21,7 @@
   "Poll maintenance page of site to determine health of system."
   (let [health (check-health) health-changes (first (data/diff health @site-health))]
     (when (not-empty health-changes)
-      (println "CHANGES " health-changes)
-      (irclj/message irc channel
+      (bot/message-channel irc :platform
         (str "Production "
           (if (contains? health-changes :up)
             (if (get health-changes :up) "is UP." "has fallen DOWN.")

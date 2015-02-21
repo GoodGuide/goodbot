@@ -39,38 +39,51 @@
   (def task-scheduler-pool (at/mk-pool))
   (doseq [plugin plugins]
     (doseq [task (get plugin :tasks)]
-      (at/every
-        (get task :interval)
-        (fn [] ((get task :work) bot))
-        task-scheduler-pool
-        :fixed-delay true
-        ; delay fso that channels can be joined(since its async/no callback)
-        :initial-delay 20000))))
+      (def work (:work task))
+      (def interval (:interval task))
+      (if (zero? interval)
+        (work bot)
+        (at/every
+          interval
+          (fn [] (work bot))
+          task-scheduler-pool
+          :fixed-delay true
+          ; delay so that channels can be joined(since its async/no callback)
+          :initial-delay 20000)))))
 
 (defn get-plugin-commands [plugins]
   (mapcat #(keys (:commands %)) plugins))
 
-(defn start [plugins & {:keys [host port nick password
+(defn message-channel [bot channel message]
+  (def channels (:channels bot))
+  (let [ch (if (contains? channels channel) channel :fallback)]
+    (if (= channel :fallback) (println "No channel is set for " channel " using fallback.")) 
+    (irclj/message bot (get channels ch) message)))
+
+(defn message-nick [bot nick message]
+  (irclj/message bot (str "@" nick) message))
+
+(defn start [plugins & {:keys [host port nick password ssl?
                                channels server-password
                                datomic-uri]}]
-
-  (println "Commands : " (str/join ", " (get-plugin-commands plugins)))
-  (println "Tasks    : " (str/join ", " (map :name (mapcat :tasks plugins))))
-
-  (println (str "connecting to " host ":" port " as " nick " with password " server-password))
+  (println "connecting to " host ":" port " as " nick " with password " server-password (if ssl? " using ssl") ".")
   (def bot (irclj/connect host port nick
                           :pass server-password
                           :callbacks {:privmsg (privmsg-callback plugins)
                                       :raw-log irclj.events/stdout-callback}
-                          :ssl? true))
+                          :ssl? ssl?))
   (dosync
     (alter bot assoc
            :prefixes {}
            :datomic-uri datomic-uri
-           :ssl? true
-           :plugins plugins)
-    (println "connecting to datomic at" datomic-uri)
-    (db/start bot))
+           :ssl? ssl?
+           :plugins plugins
+           :channels channels)
+  (println "Commands : " (str/join ", " (get-plugin-commands plugins)))
+  (println "Tasks    : " (str/join ", " (map :name (mapcat :tasks plugins))))
+  (println "Datomic  : " datomic-uri)
+  (println "Channels : " (str/join ", " (vals channels)))
+  (db/start bot))
   (when password (irclj/identify bot password))
-  (doseq [c channels] (println "joining" c) (irclj/join bot c))
+  (doseq [c (vals channels)] (println "joining" c) (irclj/join bot c))
   (schedule-tasks bot plugins))
