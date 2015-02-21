@@ -40,17 +40,11 @@
   (def task-scheduler-pool (at/mk-pool))
   (doseq [plugin plugins]
     (doseq [task (get plugin :tasks)]
+      (def work #((:work task) bot))
       (if (contains? task :interval) 
-        (at/every (:interval task)
-            #((:work task) bot)
-            task-scheduler-pool
-            :fixed-delay true
-            :initial-delay warm-up-delay]))
+        (at/every (:interval task) work task-scheduler-pool :initial-delay warm-up-delay))
       (if (contains? task :run-at-startup)
-        (at/after 
-          warm-up-delay
-          #((:work task) bot)
-          task-scheduler-pool))))
+        (at/after warm-up-delay work task-scheduler-pool)))))
 
 (defn get-plugin-commands [plugins]
   (mapcat #(keys (:commands %)) plugins))
