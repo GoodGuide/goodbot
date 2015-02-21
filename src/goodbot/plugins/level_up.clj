@@ -6,7 +6,7 @@
             [datomic.api :as datomic]))
 
 (defn level-up [irc]
-  (println "::::RUNNING::::::"))
+  (println "\n\n\n\n::::RUNNING::::::\n\n\n\n"))
 
 (def plugin {:author "davidhampgonsalves"
              :schema "level-up.edn"

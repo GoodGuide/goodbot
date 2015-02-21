@@ -36,20 +36,19 @@
 
 (defn schedule-tasks [bot, plugins]
   "Schedule all plugin tasks"
+  (def warm-up-delay 5000)
   (def task-scheduler-pool (at/mk-pool))
   (doseq [plugin plugins]
     (doseq [task (get plugin :tasks)]
-      (def work (:work task))
       (def interval (:interval task))
-      (if (zero? interval)
-        (work bot)
-        (at/every
-          interval
-          (fn [] (work bot))
-          task-scheduler-pool
-          :fixed-delay true
-          ; delay so that channels can be joined(since its async/no callback)
-          :initial-delay 20000)))))
+      (println "  scheduling " interval)
+      ; if interval is 0 call the task once after a fixed delay(for channels to be joined)
+      (apply (if (zero? interval) at/after at/every)
+          [(if (zero? interval) warm-up-delay interval)
+            #((:work task) bot)
+            task-scheduler-pool
+            :fixed-delay true
+            :initial-delay warm-up-delay]))))
 
 (defn get-plugin-commands [plugins]
   (mapcat #(keys (:commands %)) plugins))
