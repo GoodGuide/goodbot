@@ -12,12 +12,9 @@
   (= (.getHour (java.time.LocalDateTime/now) hour)))
 
 (defn fetch-presenter-list [irc]
-  (def presenters (-> irc 
-      db/get-conn
-      datomic/db
-      (#(datomic/q '[:find ?id ?nick ?last-presented 
+  (def presenters (db/q irc '[:find ?id ?nick ?last-presented 
                      :where [?id :talks.presenter/nick ?nick] 
-                            [?id :talks.presenter/last-presented ?last-presented]] %))))
+                            [?id :talks.presenter/last-presented ?last-presented]]))
   (sort-by :last-presented (map #(zipmap [:id :nick :last-presented] %1) presenters)))
 
 (defn fetch-presenter [irc]

@@ -34,9 +34,9 @@
         (println (.getMessage e))
         (.printStackTrace e)))))
 
-(defn schedule-tasks [bot, plugins]
+(defn schedule-tasks [bot plugins]
   "Schedule all plugin tasks"
-  (def warm-up-delay 5000)
+  (def warm-up-delay 7000)
   (def task-scheduler-pool (at/mk-pool))
   (doseq [plugin plugins]
     (doseq [task (get plugin :tasks)]
@@ -46,8 +46,8 @@
       (if (contains? task :run-at-startup)
         (at/after warm-up-delay work task-scheduler-pool)))))
 
-(defn get-plugin-commands [plugins]
-  (mapcat #(keys (:commands %)) plugins))
+(defn get-plugin-commands [bot]
+  (mapcat #(keys (:commands %)) (:plugins @bot)))
 
 (defn message-channel [bot channel message]
   (def channels (:channels bot))
@@ -67,18 +67,20 @@
                           :callbacks {:privmsg (privmsg-callback plugins)
                                       :raw-log irclj.events/stdout-callback}
                           :ssl? ssl?))
+  (def tasks (map :name (mapcat :tasks plugins)))
   (dosync
     (alter bot assoc
            :prefixes {}
            :datomic-uri datomic-uri
            :ssl? ssl?
            :plugins plugins
-           :channels channels)
-  (println "Commands : " (str/join ", " (get-plugin-commands plugins)))
-  (println "Tasks    : " (str/join ", " (map :name (mapcat :tasks plugins))))
+           :tasks tasks 
+           :channels channels))
+  (println "Commands : " (str/join ", " (get-plugin-commands bot)))
+  (println "Tasks    : " (str/join ", " tasks))
   (println "Datomic  : " datomic-uri)
   (println "Channels : " (str/join ", " (vals channels)))
-  (db/start bot))
+  (db/start bot)
   (when password (irclj/identify bot password))
   (doseq [c (vals channels)] (println "joining" c) (irclj/join bot c))
   (schedule-tasks bot plugins))
