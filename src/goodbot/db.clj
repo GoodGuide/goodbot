@@ -8,6 +8,11 @@
   (def uri (:datomic-uri @irc))
   (d/connect uri))
 
+(defn transact [irc q]
+  (println q)
+  (def conn (get-conn irc))
+  @(d/transact conn q))
+
 (defn resource [name] (clojure.java.io/resource name))
 
 (defn load-datoms-from-resource [conn resource]

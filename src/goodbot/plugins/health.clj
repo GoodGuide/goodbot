@@ -2,7 +2,6 @@
   "Monitors the health of Production."
   (:require [goodbot.parse :refer [extract-word]]
             [irclj.core :as irclj]
-            [clojure.string :refer [join]]
             [clj-http.client :as client]
             [clojure.data :as data]))
 

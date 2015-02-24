@@ -8,7 +8,6 @@
    [overtone.at-at :as at]
    [clojure.string :as str]])
 
-
 (defn select-handler [plugins name]
   (->> plugins (map #(get-in % [:commands name])) (remove nil?) first))
 
@@ -62,7 +61,7 @@
                           :pass server-password
                           :callbacks {:privmsg (privmsg-callback plugins)
                                       :raw-log irclj.events/stdout-callback}
-                          :ssl? true))
+                          :ssl? false))
   (dosync
     (alter bot assoc
            :prefixes {}

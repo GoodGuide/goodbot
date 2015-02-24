@@ -2,13 +2,9 @@
   "Manages our tech talk schedule"
   (:require [goodbot.parse :refer [extract-word]]
             [irclj.core :as irclj]
-            [goodbot.db :as db]
+            [goodbot.db :as db :refer [transact]]
             [datomic.api :as datomic]))
 
-(defn transact [irc q]
-  (println q)
-  (def conn (db/get-conn irc))
-  @(datomic/transact conn q))
 
 (defn is-thursday? []
   (= (.getDayOfWeek (java.time.LocalDateTime/now)) (java.time.DayOfWeek/THURSDAY)))
