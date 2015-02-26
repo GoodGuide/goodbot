@@ -12,14 +12,14 @@
               :where [_ :level-up/skills ?s]]))
   (println prev-skills)
   (println "::::::::::::: retracting skills")
-  (comment db/transact irc '[":db/retract" [":level-up/skills"]]) 
+  (db/transact irc '[":db/retract" [":level-up/skills"]]) 
 
   (def skills (concat (bot/get-plugin-commands irc) (:tasks @irc)))
   (println "::::::::::::: adding skills")
   (println "::::: " skills)
 
   (println ":::::: building query")
-  (def add-query (map #((println "map " %){:db/id #db/id[:db.part/level-up] :level-up/skills %}) skills))
+  (def add-query (mapv (fn [skill] {:db/id #db/id[:db.part/level-up] :level-up/skills skill}) skills))
 
   (println ":::::: query " add-query)
   (println "========================")
