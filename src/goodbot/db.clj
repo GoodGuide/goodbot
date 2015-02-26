@@ -1,8 +1,6 @@
 (ns goodbot.db
   "data functions"
-  (:require [datomic.api :as d :refer [db q]]))
-
-(defn hello [] (println "hello"))
+  (:require [datomic.api :as d]))
 
 (defn get-conn [irc]
   (def uri (:datomic-uri @irc))
@@ -12,6 +10,11 @@
   (println q)
   (def conn (get-conn irc))
   @(d/transact conn q))
+
+(defn q [irc q]
+  (println q)
+  (-> irc get-conn d/db 
+      (#(d/q q %)))) 
 
 (defn resource [name] (clojure.java.io/resource name))
 
