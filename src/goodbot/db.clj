@@ -26,10 +26,6 @@
                      r)]
       @(d/transact conn [datoms]))))
 
-(defn mock-start []
-  (ref irc {:datomic-uri "mem::datomic"})
-  (start irc))
-
 (defn start [irc]
   (d/create-database (:datomic-uri @irc))
   (def conn (get-conn irc))
