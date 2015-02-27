@@ -3,7 +3,6 @@
   (:require [goodbot.parse :refer [extract-word]]
             [goodbot.bot :as bot]
             [irclj.core :as irclj]
-            [clojure.string :refer [join]]
             [clj-http.client :as client]
             [clojure.data :as data]))
 

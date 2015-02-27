@@ -8,7 +8,6 @@
    [overtone.at-at :as at]
    [clojure.string :as str]])
 
-
 (defn select-handler [plugins name]
   (->> plugins (map #(get-in % [:commands name])) (remove nil?) first))
 

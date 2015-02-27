@@ -6,14 +6,15 @@
   (def uri (:datomic-uri @irc))
   (d/connect uri))
 
+(defn transact [irc q]
+  (println q)
+  (def conn (get-conn irc))
+  @(d/transact conn q))
+
 (defn q [irc q]
   (println q)
   (-> irc get-conn d/db 
       (#(d/q q %)))) 
-
-(defn transact [irc q]
-  (println q)
-  @(d/transact (get-conn irc) q))
 
 (defn resource [name] (clojure.java.io/resource name))
 
