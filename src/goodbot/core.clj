@@ -35,12 +35,12 @@
                                   (str "/goodbot"))))
                         ; default to in-memory
                         (or "datomic:mem://goodbot"))]
-    (goodbot.bot/start plugins
+    (bot/start plugins
                        :host host
                        :port (Integer/parseInt port)
-                       :ssl? false
                        :nick nick
                        :password password
+                       :ssl? ssl?
                        :channels channels
                        :server-password server-password
                        :datomic-uri datomic-uri)))
@@ -56,7 +56,9 @@
 (defn run-task [task-name]
   (def plugins (load-plugins))
   (def irc (ref {:datomic-uri "datomic:mem://goodbot"
-                 :plugins plugins}))
+                 :channels {:fallback "#goodbot-test"}
+                 :plugins plugins
+                 :tasks (bot/get-task-names plugins)}))
   (println " - setting up database")
   (db/start irc)
   (println " - database setup complete")

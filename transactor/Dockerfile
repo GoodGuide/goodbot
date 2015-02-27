@@ -2,9 +2,10 @@ FROM dockerfile/java:oracle-java8
 
 ENV DATOMIC_VERSION 0.9.5067
 
-RUN curl -LOk https://my.datomic.com/downloads/free/$DATOMIC_VERSION.zip \
-  && unzip datomic-pro-$DATOMIC_VERSION.zip \
-  && mv datomic-pro-$DATOMIC_VERSION datomic \
+RUN curl --progress-bar --location --user-agent 'tauhoDB (info@tauho.db)' --url "https://my.datomic.com/downloads/free/${DATOMIC_VERSION}" --output datomic.zip \
+  && unzip datomic.zip \
+  && rm datomic.zip \
+  && mv datomic-free-$DATOMIC_VERSION datomic \
   && cd datomic
 
 ENV PATH $PATH:/data/datomic/bin

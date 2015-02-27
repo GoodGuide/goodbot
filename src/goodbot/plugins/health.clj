@@ -23,10 +23,10 @@
       (bot/message-channel irc :platform
         (str "Production "
           (if (contains? health-changes :up)
-            (if (get health-changes :up) "is UP." "has fallen DOWN.")
+            (if (get health-changes :up) "is UP. :chart_with_upwards_trend:" "has fallen DOWN. :chart_with_downwards_trend:")
             (if (get health-changes :maintenance)
-              "is in MAINTENANCE"
-              "MAINTENANCE is complete"))))
+              "is in MAINTENANCE. :wrench:"
+              "MAINTENANCE is complete. :clap:"))))
       (swap! site-health merge @site-health health))))
 
 (def plugin {:author "davidhampgonsalves"
@@ -37,5 +37,5 @@
                       (if (get health :up) "UP" "DOWN")
                       (when (health :maintenance) " but in MAINTENANCE MODE."))))}
              :tasks [{:name "production health monitor"
-                      :interval 5000
+                      :interval 2500
                       :work poll-health}]})

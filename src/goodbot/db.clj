@@ -36,5 +36,5 @@
       (if-let [resource (clojure.java.io/resource resource-name)]
         (do
           (println "loading schema" resource-name)
-          (load-datoms-from-resource conn resource))
+          (comment load-datoms-from-resource conn resource))
         (println "schema" resource-name "is missing, skipping.")))))

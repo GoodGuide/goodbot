@@ -4,30 +4,34 @@
             [irclj.core :as irclj]
             [goodbot.db :as db]
             [goodbot.bot :as bot]
+            [clojure.string :as str]
             [datomic.api :as datomic]))
 
+(defn level-up-message [skills new-skills]
+  (into [(str "goodbot grew to level *" (count skills) "!* :clap:")]
+    (->> new-skills
+      (map #(str "> learned *" % "*!")))))
+
 (defn level-up [irc]
-  (println "::::::::::::: getting skills")
-  (def prev-skills (db/q irc '[:find ?s
-              :where [_ :level-up/skills ?s]]))
-  (println prev-skills)
-  (println "::::::::::::: retracting skills")
-  (db/transact irc '[":db/retract" [":level-up/skills"]]) 
+  (let [prev-skills (db/q irc '[:find ?s
+              :where [_ :level-up/skills ?s]])
+        prev-skills (flatten (into set prev-skills))
+        skills (concat (bot/get-plugin-commands irc) (:tasks @irc))
+        new-skills (clojure.set/difference (set skills) prev-skills)] 
+  
+    (if-not (empty? new-skills) 
+        (bot/message-channel irc :general (level-up-message skills new-skills)))
 
-  (def skills (concat (bot/get-plugin-commands irc) (:tasks @irc)))
-  (println "::::::::::::: adding skills")
-  (println "::::: " skills)
+    (if-not (empty? prev-skills)
+      (db/transact irc [[":db.fn/retractEntity" [:level-up/skills "_"]]]))
+  
+    (def add-query (mapv (fn [skill] {:db/id #db/id[:db.part/level-up] :level-up/skills skill}) skills))
 
-  (println ":::::: building query")
-  (def add-query (mapv (fn [skill] {:db/id #db/id[:db.part/level-up] :level-up/skills skill}) skills))
+    (db/transact irc add-query)))
 
-  (println ":::::: query " add-query)
-  (println "========================")
-  (db/transact irc add-query)
-  (println "::::: DONE"))
   
 (def plugin {:author "davidhampgonsalves"
              :schema "level-up.edn"
-             :tasks [{:name "celebrate learning new tricks"
+             :tasks [{:name "level-up"
                       :run-at-startup true
                       :work level-up}]})

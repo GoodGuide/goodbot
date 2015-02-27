@@ -13,9 +13,13 @@
 
 (defn respond-with [irc message responses]
   (when-not (nil? responses)
-    (def vec-responses (if (coll? responses) responses [responses]))
-    (doseq [r vec-responses]
-      (irclj/reply irc message r))))
+    (println (:target message))
+    (println message)
+    (let [message (if (.startsWith (:target message) "#") message (assoc message :target (:user message)))
+          vec-responses (if (coll? responses) responses [responses])]
+      (println (:target message))
+      (doseq [r vec-responses]
+        (irclj/reply irc message r)))))
 
 (defn privmsg-callback [plugins]
   (fn [irc message]
@@ -48,11 +52,15 @@
 (defn get-plugin-commands [bot]
   (mapcat #(keys (:commands %)) (:plugins @bot)))
 
-(defn message-channel [bot channel message]
-  (def channels (:channels bot))
-  (let [ch (if (contains? channels channel) channel :fallback)]
-    (if (= channel :fallback) (println "No channel is set for " channel " using fallback.")) 
-    (irclj/message bot (get channels ch) message)))
+(defn get-task-names [plugins] (map :name (mapcat :tasks plugins)))
+
+(defn message-channel [bot requested-channel messages]
+  (def messages (if-not (seq? messages) [messages] messages))
+  (def channels (:channel-names @bot))
+  (let [channel (if (contains? channels requested-channel) requested-channel :fallback)]
+    (if (= channel :fallback) (println "No channel is set for " requested-channel " using fallback.")) 
+    (doseq [message messages]
+      (irclj/message bot (get channels channel) message))))
 
 (defn message-nick [bot nick message]
   (irclj/message bot (str "@" nick) message))
@@ -66,20 +74,19 @@
                           :callbacks {:privmsg (privmsg-callback plugins)
                                       :raw-log irclj.events/stdout-callback}
                           :ssl? ssl?))
-  (def tasks (map :name (mapcat :tasks plugins)))
+  (def tasks (get-task-names plugins))
   (dosync
     (alter bot assoc
            :prefixes {}
            :datomic-uri datomic-uri
-           :ssl? ssl?
            :plugins plugins
-           :tasks tasks 
-           :channels channels))
-  (println "Commands : " (str/join ", " (get-plugin-commands bot)))
-  (println "Tasks    : " (str/join ", " tasks))
-  (println "Datomic  : " datomic-uri)
-  (println "Channels : " (str/join ", " (vals channels)))
+           :tasks  tasks
+           :channel-names channels))
+  (println "Commands :" (str/join ", " (get-plugin-commands bot)))
+  (println "Tasks    :" (str/join ", " tasks))
+  (println "Datomic  :" datomic-uri)
+  (println "Channels :" (str/join ", " (vals channels)))
   (db/start bot)
   (when password (irclj/identify bot password))
-  (doseq [c (vals channels)] (println "joining" c) (irclj/join bot c))
+  (doseq [c (vals channels)] (println "Joining" c) (irclj/join bot c))
   (schedule-tasks bot plugins))

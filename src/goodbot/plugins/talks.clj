@@ -37,16 +37,14 @@
    (catch Exception e "you were not a presenter (" (.getMessage e) ")."))) 
 
 (defn print-presenters[irc msg] 
-  (comment "new lines break IRC but slack likes them") 
-  (reduce
-    #(conj %1 (str (if (empty? %1) ">" "-") " " (:nick %2) "\n"))
-    []
+  (map-indexed
+    #(str "> " (:nick %2) (when (zero? %1) " :movie_camera:"))
     (fetch-presenter-list irc)))
 
 (defn notify-presenter [irc]
   (def presenter (fetch-presenter irc))
   (if (and (not (nil? presenter)) (is-thursday?) (is-hour 10))
-   (bot/message-nick irc (:nick presenter) "You are the tech talk presenter for today, if you don't have a talk/video in mind check the wiki. https://goodguide.atlassian.net/wiki/display/E/Tech+Talks")))
+   (bot/message-nick irc (:nick presenter) "You are todays tech talk presenter :movie_camera:. Need a video idea, check the wiki. https://goodguide.atlassian.net/wiki/display/E/Tech+Talks")))
 
 (defn mark-presentation-completed [irc]
   (def now (java.time.LocalDateTime/now))
