@@ -1,10 +1,14 @@
 transactor:
   build: ./transactor
+  ports: 
+    - "4334:4334"
+    - "4335:4335"
   volumes:
     - ./data:/app/data
 
 bot:
   build: .
+  command: lein run
   links:
     - transactor
   environment:
