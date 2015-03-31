@@ -39,7 +39,7 @@
 
 (defn schedule-tasks [bot plugins]
   "Schedule all plugin tasks"
-  (def warm-up-delay 7000)
+  (def warm-up-delay 10000)
   (def task-scheduler-pool (at/mk-pool))
   (doseq [plugin plugins]
     (doseq [task (get plugin :tasks)]
@@ -63,7 +63,7 @@
       (irclj/message bot (get channels channel) message))))
 
 (defn message-nick [bot nick message]
-  (irclj/message bot (str "@" nick) message))
+  (irclj/message bot nick message))
 
 (defn start [plugins & {:keys [host port nick password ssl?
                                channels server-password
