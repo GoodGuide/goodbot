@@ -14,6 +14,16 @@
                 walk/keywordize-keys)]
     (if-not (contains? ch :fallback) (conj ch [:fallback "#goodbot-test"]) ch)))
 
+(defn datomic-uri []
+  (-> (System/getenv "GOODBOT_DATOMIC")
+                                        ; detect docker link
+                  (or (when-let [link-uri (System/getenv "TRANSACTOR_PORT")]
+                        (-> link-uri
+                            (.replace "tcp" "datomic:free")
+                            (str "/goodbot"))))
+                                        ; default to in-memory
+                  (or "datomic:mem://goodbot")))
+
 (defn run [plugins]
   "runs a bot with the given plugins with configuration based on environment variables"
   (let [[host port] (-> (System/getenv "GOODBOT_HOST")
@@ -27,14 +37,8 @@
         password (System/getenv "GOODBOT_PASSWORD")
         ssl? (or (System/getenv "GOODBOT_SSL_ENABLED") false)
         channels (get-channels)
-        datomic-uri (-> (System/getenv "GOODBOT_DATOMIC")
-                        ; detect docker link
-                        (or (when-let [link-uri (System/getenv "TRANSACTOR_PORT")]
-                              (-> link-uri
-                                  (.replace "tcp" "datomic:free")
-                                  (str "/goodbot"))))
-                        ; default to in-memory
-                        (or "datomic:mem://goodbot"))]
+        datomic-uri (datomic-uri)
+        ]
     (bot/start plugins
                        :host host
                        :port (Integer/parseInt port)
@@ -55,7 +59,7 @@
 
 (defn run-task [task-name]
   (def plugins (load-plugins))
-  (def irc (ref {:datomic-uri "datomic:mem://goodbot"
+  (def irc (ref {:datomic-uri (datomic-uri)
                  :channels {:fallback "#goodbot-test"}
                  :plugins plugins
                  :tasks (bot/get-task-names plugins)}))

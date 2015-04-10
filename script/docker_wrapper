@@ -1,0 +1,8 @@
+#!/bin/bash
+
+docker_ip=$TRANSACTOR_PORT_4335_TCP_ADDR
+sed -i "s/DOCKER_IP/${docker_ip}/" transactor/free-transactor.properties
+
+export GOODBOT_DATOMIC="datomic:free://${docker_ip}:4334/goodbot"
+
+exec "$@"

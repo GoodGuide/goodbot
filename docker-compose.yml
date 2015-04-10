@@ -4,13 +4,11 @@ transactor:
     - "4334:4334"
     - "4335:4335"
   volumes:
-    - ./data:/app/data
+    - ./data:/data/datomic/data/
 
 bot:
   build: .
+  env_file: .env
   command: lein run
   links:
     - transactor
-  environment:
-    - GOODBOT_CHANNELS=#goodbot-test
-    - GOODBOT_NICK=goodbot-test

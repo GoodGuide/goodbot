@@ -10,8 +10,14 @@ RUN curl --progress-bar --location --user-agent 'tauhoDB (info@tauho.db)' --url 
 
 ENV PATH $PATH:/data/datomic/bin
 
+WORKDIR /data
+
 ADD free-transactor.properties /data/datomic/
 
+ADD . /data
+
 EXPOSE 4334 4335
+
+ENTRYPOINT ["script/docker_wrapper"]
 
 CMD ["transactor", "/data/datomic/free-transactor.properties"]
